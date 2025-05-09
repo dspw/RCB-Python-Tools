@@ -22,7 +22,7 @@ from tkinter import messagebox
 
 # === Tkinter Setup ===
 geoWidth = 405
-geoHeight = 180
+geoHeight = 200
 geometry = "%dx%d" % (geoWidth,geoHeight)
 
 root = tk.Tk()
@@ -44,6 +44,7 @@ pulse_input = StringVar(value="0.5")
 loop_input = StringVar(value="1.0")
 enable = IntVar()
 
+ipNumber = '127.0.0.1'   #"192.168.0.220"
 eventNumStr = "1"
 pulseTime = 0.5
 loopTime = 1.0
@@ -53,26 +54,31 @@ Label(text="Status", anchor="w").grid(row=3, column=0, padx=10, sticky="w")
 Label(text="Event # ").grid(row=0, column=0, padx=10, sticky="w")
 Label(text="Pulse Time(s)").grid(row=1, column=0, padx=10, sticky="w")
 Label(text="Loop Time(s)").grid(row=2, column=0, padx=10, sticky="w")
+Label(text='Press "Return Key" to enter values.').grid(row=6, column=0, columnspan=4, padx=10, pady=5, sticky="w")
+Label(text='v0.1.0').grid(row=6,column=3, sticky="e")
+
+Label(text="IP Number").grid(row=4, column=0, padx=10, sticky="w")
+lblIpNum = Label(text= ipNumber, justify="left")
+lblIpNum.grid(row=4, column=1, padx=00, sticky="w")
 
 lblEventNum = Label(text="Event # 1", justify="left")
-lblEventNum.grid(row=4, column=0, padx=10, sticky="w")
+lblEventNum.grid(row=5, column=0, padx=10, sticky="w")
 
 lblPulseNum = Label(text="Pulse 0.5s", justify="left", width=10)
-lblPulseNum.grid(row=4, column=1, sticky="w")
+lblPulseNum.grid(row=5, column=1, sticky="w")
 
 lblLoopNum = Label(text="Loop 1s", justify="center")
-lblLoopNum.grid(row=4, column=2)
+lblLoopNum.grid(row=5, column=2)
 
 lblLoopOnOff = Label(text="Loop is Off")
-lblLoopOnOff.grid(row=4, column=3, padx=10)
+lblLoopOnOff.grid(row=5, column=3, padx=10)
 
-Label(text='Press "Return Key" to enter values.').grid(row=5, column=0, columnspan=4, padx=10, pady=5, sticky="w")
 
 # === Entry Widgets ===
 event_box = Entry(root, textvariable=event_input, width=1)
 event_box.grid(row=0, column=1, sticky="w")
 
-pulse_box = Entry(root, textvariable=pulse_input, width=3)
+pulse_box = Entry(root, textvariable=pulse_input, width=5)
 pulse_box.grid(row=1, column=1, sticky="w")
 
 loop_box = Entry(root, textvariable=loop_input, width=5)
@@ -94,11 +100,11 @@ def get_event(event=None):
 
 def get_pulseTime(event=None):
     global pulseTime
-    val = pulse_box.get()[:4]
+    val = pulse_box.get()[:5]
     try:
         val = float(val)
         if 0.1 <= val <= 1000:
-            val = Decimal(val).quantize(Decimal("0.0"))
+            val = Decimal(val).quantize(Decimal("0.000"))
         else:
             raise ValueError
     except ValueError:
@@ -115,7 +121,7 @@ def get_loopTime(event=None):
     global loopTime
     try:
         val = float(loop_box.get())
-        if 0.5 <= val <= 1440:
+        if 0.5 <= val <= 2880:
             formatted = f"{val:.3f}"
         else:
             raise ValueError
@@ -143,11 +149,13 @@ def toggleEvent():
     get_event()
     get_pulseTime()
     try:
-        response = requests.put("http://localhost:37497/api/message",
+        response = requests.put("http://" + ipNumber + ":37497/api/message",
+           #response = requests.put("http://localhost:37497/api/message",
                  json={"text": f"DSPW RCB TRIGGER {eventNumStr} 1"})
         response.raise_for_status()
         sleep(pulseTime)
-        response = requests.put("http://localhost:37497/api/message",
+        response = requests.put("http://" + ipNumber + ":37497/api/message",
+          #response = requests.put("http://localhost:37497/api/message",
                  json={"text": f"DSPW RCB TRIGGER {eventNumStr} 0"})
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
@@ -161,7 +169,8 @@ def setEvent():
     get_event()
     
     try:
-        response = requests.put("http://localhost:37497/api/message",
+        response = requests.put("http://" + ipNumber + ":37497/api/message",
+          #response = requests.put("http://localhost:37497/api/message",
                  json={"text": f"DSPW RCB TRIGGER {eventNumStr} 1"})
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
@@ -177,7 +186,8 @@ def clearEvent():
     get_event()
     
     try:
-        response = requests.put("http://localhost:37497/api/message",
+        response = requests.put("http://" + ipNumber + ":37497/api/message",
+        #  response = requests.put("http://localhost:37497/api/message",
                  json={"text": f"DSPW RCB TRIGGER {eventNumStr} 0"})
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
