@@ -14,8 +14,8 @@ from decimal import Decimal
 from tkinter import messagebox
 
 # === Tkinter Setup ===
-geoWidth = 315
-geoHeight = 140
+geoWidth = 320
+geoHeight = 160
 geometry = "%dx%d" % (geoWidth,geoHeight)
 
 root = tk.Tk()
@@ -35,6 +35,8 @@ event_input = StringVar(value="1")
 pulse_input = StringVar(value="500")
 enable = IntVar()
 
+ipNumber = '127.0.0.1'   #"192.168.0.220"
+
 eventNumStr = "1"
 pulseTime = 0.5
 
@@ -48,17 +50,22 @@ canvas.create_line(10, 63, 305, 63, width=2)
 Label(text="Status", anchor="w").grid(row=2, column=0, padx=10, pady=(10,0), sticky="w")
 Label(text="Event # ").grid(row=0, column=0, padx=10, sticky="w")
 Label(text="Pulse (ms) ").grid(row=1, column=0, padx=10, sticky="w")
+Label(text='Press "Return Key" to enter values.').grid(row=5, column=0, columnspan=4, padx=10, pady=5, sticky="w")
+Label(text='v0.1.0').grid(row=5,column=3, sticky="e")
+
+Label(text="IP Number").grid(row=3, column=0, padx=10, sticky="w")
+lblIpNum = Label(text= ipNumber, justify="left")
+lblIpNum.grid(row=3, column=1, padx=00, sticky="w")
 
 lblEventNum = Label(text="Event # 1", justify="left")
-lblEventNum.grid(row=3, column=0, padx=10, sticky="w")
+lblEventNum.grid(row=4, column=0, padx=10, sticky="w")
 
 lblPulseNum = Label(text="Pulse 0.5s", justify="left", width=10)
-lblPulseNum.grid(row=3, column=1, sticky="w")
+lblPulseNum.grid(row=4, column=1, sticky="w")
 
 lblTimerOnOff = Label(text="Timer Off")
-lblTimerOnOff.grid(row=3, column=2, padx=10)
+lblTimerOnOff.grid(row=4, column=2, padx=10)
 
-Label(text='Press "Return Key" to enter values.').grid(row=5, column=0, columnspan=4, padx=10, pady=5, sticky="w")
 
 # === Entry Widgets ===
 event_box = Entry(root, textvariable=event_input, width=1)
@@ -113,7 +120,8 @@ def setEvent():
     get_pulseTime()
    
     try:
-        response = requests.put("http://localhost:37497/api/message",
+        response = requests.put("http://" + ipNumber + ":37497/api/message",
+        #response = requests.put("http://localhost:37497/api/message",
                  json={"text": f"DSPW RCB TIMER {eventNumStr} {pulseTime}"})
         response.raise_for_status()
         lblTimerOnOff.config(text="Timer On")
@@ -126,7 +134,8 @@ def setEvent():
 
 def clearEvent():
     try:
-        response = requests.put("http://localhost:37497/api/message",
+        response = requests.put("http://" + ipNumber + ":37497/api/message",
+        #response = requests.put("http://localhost:37497/api/message",
                  json={"text": f"DSPW RCB TIMER {eventNumStr} 0"})
         response.raise_for_status()
         lblTimerOnOff.config(text="Timer Off")
